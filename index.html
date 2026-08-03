@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RL Smart Lighting Simulation</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#f3f6fa;--surface:#fff;--surface2:#f8fafc;
+  --border:#dce2ea;--border2:#cdd6e2;
+  --text:#2c3e50;--text2:#7a8896;--text3:#94a3b8;
+  --accent:#185fa5;--green:#16a34a;--amber:#d97706;--red:#dc2626;
+  --ppo:#185fa5;--a2c:#dc2626;--sac:#16a34a;--td3:#d97706;
+  --radius:10px;--shadow:0 2px 12px rgba(0,0,0,0.07);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.title-banner{
+  background:linear-gradient(135deg,#0f2444 0%,#185fa5 60%,#1e7cc5 100%);
+  color:#fff;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  box-shadow:0 2px 16px rgba(0,0,0,0.18);
+}
+.title-banner h1{font-family:'Space Mono',monospace;font-size:0.93rem;font-weight:700;letter-spacing:-0.3px;line-height:1.55;}
+.title-badge{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:20px;padding:4px 14px;font-size:0.7rem;font-family:'Space Mono',monospace;color:#e0f0ff;white-space:nowrap;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:var(--shadow);}
+.algo-pills{display:flex;gap:8px;}
+.pill{padding:5px 16px;border-radius:20px;font-size:0.8rem;font-family:'Space Mono',monospace;font-weight:700;cursor:pointer;border:1.5px solid var(--border2);background:var(--surface2);color:var(--text2);transition:all .2s;user-select:none;}
+.pill:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,0.1);}
+.pill.active-PPO{background:var(--ppo);border-color:var(--ppo);color:#fff;}
+.pill.active-A2C{background:var(--a2c);border-color:var(--a2c);color:#fff;}
+.pill.active-SAC{background:var(--sac);border-color:var(--sac);color:#fff;}
+.pill.active-TD3{background:var(--td3);border-color:var(--td3);color:#000;}
+.algo-info{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:0.75rem;color:var(--text2);display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.seed-badge{padding:2px 10px;border-radius:12px;font-size:0.7rem;font-family:'Space Mono',monospace;font-weight:700;background:#e0f0ff;color:var(--accent);border:1px solid #b3d4f0;}
+.main{display:grid;grid-template-columns:1fr 300px;gap:12px;padding:12px;max-width:1380px;margin:0 auto;}
+.left-col{display:flex;flex-direction:column;gap:10px;}
+.right-col{display:flex;flex-direction:column;gap:10px;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+.panel-header{padding:8px 14px;border-bottom:1px solid var(--border);font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text3);background:var(--surface2);display:flex;justify-content:space-between;align-items:center;}
+#roomCanvas{width:100%;display:block;background:#eef2f7;}
+.mini-bars{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:10px 14px;border-top:1px solid var(--border);background:var(--surface2);}
+.mini-bar-item label{font-size:0.65rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;display:flex;justify-content:space-between;margin-bottom:4px;}
+.mini-bar-item label span{font-family:'Space Mono',monospace;color:var(--text);}
+.bar-track{background:var(--border2);border-radius:3px;height:5px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;transition:width .3s ease;}
+.controls{padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ctrl-btn{width:34px;height:34px;border-radius:7px;border:1.5px solid var(--border2);background:var(--surface2);cursor:pointer;font-size:0.95rem;display:flex;align-items:center;justify-content:center;transition:all .15s;color:var(--text);}
+.ctrl-btn:hover{background:var(--border);transform:translateY(-1px);}
+.ctrl-btn.play-btn{background:var(--accent);border-color:var(--accent);color:#fff;width:40px;height:40px;font-size:1.05rem;}
+.ctrl-btn.play-btn:hover{background:#1a6dc0;}
+.timeline-wrap{flex:1;min-width:180px;}
+.timeline-labels{display:flex;justify-content:space-between;font-size:0.6rem;color:var(--text3);font-family:'Space Mono',monospace;margin-bottom:4px;}
+.timeline-track{background:var(--border2);border-radius:5px;height:8px;position:relative;cursor:pointer;}
+.timeline-fill{height:100%;border-radius:5px;transition:width .15s;background:var(--accent);}
+.timeline-thumb{position:absolute;top:50%;transform:translate(-50%,-50%);width:15px;height:15px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.2);pointer-events:none;}
+.speed-select{font-size:0.76rem;border:1px solid var(--border2);border-radius:6px;padding:4px 6px;background:var(--surface2);color:var(--text);font-family:'Space Mono',monospace;cursor:pointer;}
+.total-reward{font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:var(--text);white-space:nowrap;text-align:right;}
+.total-reward small{display:block;font-size:0.6rem;color:var(--text3);font-weight:400;}
+.chart-wrap{padding:8px 14px 12px;}
+#rewardChart{max-height:130px;min-height:100px;}
+.info-section{padding:8px 12px;border-bottom:1px solid var(--border);}
+.info-section:last-child{border-bottom:none;}
+.info-section-title{font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:6px;font-weight:600;}
+.comfort-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-family:'Space Mono',monospace;font-size:0.76rem;font-weight:700;}
+.badge-green{background:#dcfce7;color:var(--green);}
+.badge-amber{background:#fef3c7;color:var(--amber);}
+.badge-red{background:#fee2e2;color:var(--red);}
+.kv-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid #f1f5f9;font-size:0.74rem;}
+.kv-row:last-child{border-bottom:none;}
+.kv-key{color:var(--text2);}
+.kv-val{font-family:'Space Mono',monospace;color:var(--text);font-size:0.72rem;}
+.score-row{margin:5px 0;}
+.score-label{display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text2);margin-bottom:2px;}
+.score-label span{font-family:'Space Mono',monospace;color:var(--text);}
+.score-track{background:var(--border);border-radius:3px;height:5px;}
+.score-fill{height:100%;border-radius:3px;transition:width .3s ease;}
+/* Overlay */
+#overlay{position:fixed;inset:0;background:rgba(243,246,250,0.97);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:14px;padding:20px;}
+.spinner{width:40px;height:40px;border:4px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.error-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px 36px;max-width:480px;text-align:center;box-shadow:var(--shadow);}
+.error-box h2{font-family:'Space Mono',monospace;color:var(--red);margin-bottom:12px;font-size:1rem;}
+.error-box p{color:var(--text2);font-size:0.83rem;line-height:1.8;margin-bottom:6px;}
+.error-box code{background:var(--surface2);border:1px solid var(--border);padding:2px 8px;border-radius:4px;font-family:'Space Mono',monospace;font-size:0.8rem;color:var(--accent);}
+@media(max-width:860px){.main{grid-template-columns:1fr;}.right-col{order:-1;}}
+</style>
+</head>
+<body>
+
+<div id="overlay">
+  <div class="spinner" id="spinnerEl"></div>
+  <p id="overlayMsg" style="color:var(--text2);font-size:0.88rem;">Loading simulation data…</p>
+  <div class="error-box" id="errorBox" style="display:none;">
+    <h2>⚠ Episode Data Not Found</h2>
+    <p>The file <code>episode_data.json</code> was not found.<br>Please run these two commands first:</p>
+    <p style="margin:10px 0;"><code>python export_episode.py</code></p>
+    <p style="margin-bottom:10px;"><code>python app.py</code></p>
+    <p>Then refresh this page (<code>F5</code>).</p>
+    <p id="errorDetail" style="margin-top:10px;font-size:0.75rem;color:var(--text3);"></p>
+  </div>
+</div>
+
+<div class="title-banner">
+  <h1>Reinforcement Learning‑Based Adaptive Smart Lighting for Human Comfort and Energy Efficiency</h1>
+</div>
+
+<div class="header">
+  <div class="algo-pills" id="algoPills"></div>
+  <div class="algo-info" id="algoInfo"><span style="color:var(--text3);">Loading…</span></div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="panel">
+      <div class="panel-header">
+        <span>Workspace Simulation</span>
+        <span id="occupancyLabel" style="font-family:'Space Mono',monospace;font-size:0.72rem;"></span>
+      </div>
+      <canvas id="roomCanvas" height="330"></canvas>
+      <div class="mini-bars">
+        <div class="mini-bar-item">
+          <label>LED Brightness <span id="valBright">—</span></label>
+          <div class="bar-track"><div class="bar-fill" id="barBright" style="background:var(--accent);width:0%"></div></div>
+        </div>
+        <div class="mini-bar-item">
+          <label>Daylight <span id="valDaylight">—</span></label>
+          <div class="bar-track"><div class="bar-fill" id="barDaylight" style="background:var(--amber);width:0%"></div></div>
+        </div>
+        <div class="mini-bar-item">
+          <label>Illuminance <span id="valLux">—</span></label>
+          <div class="bar-track"><div class="bar-fill" id="barLux" style="background:var(--green);width:0%"></div></div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="ctrl-btn" id="btnRestart" title="Restart (R)">⏮</button>
+        <button class="ctrl-btn" id="btnBack"    title="Back (←)">◀</button>
+        <button class="ctrl-btn play-btn" id="btnPlay" title="Play/Pause (Space)">▶</button>
+        <button class="ctrl-btn" id="btnFwd"     title="Forward (→)">▶|</button>
+        <select class="speed-select" id="speedSel">
+          <option value="500">0.25×</option>
+          <option value="250">0.5×</option>
+          <option value="120" selected>1×</option>
+          <option value="60">2×</option>
+          <option value="25">4×</option>
+        </select>
+        <div class="timeline-wrap">
+          <div class="timeline-labels">
+            <span>00:00</span>
+            <span id="stepLabel">— / —</span>
+            <span>24:00</span>
+          </div>
+          <div class="timeline-track" id="timelineTrack">
+            <div class="timeline-fill" id="timelineFill" style="width:0%"></div>
+            <div class="timeline-thumb" id="timelineThumb" style="left:0%"></div>
+          </div>
+        </div>
+        <div class="total-reward">
+          <small>Total Reward</small>
+          <span id="totalReward">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span>Reward Trajectory</span>
+        <span style="font-size:0.62rem;color:var(--text3);font-weight:400;font-family:'Inter',sans-serif;">
+          Cumulative reward collected over 48 steps (24h episode) — steeper = better agent
+        </span>
+      </div>
+      <div class="chart-wrap">
+        <div style="display:flex;gap:16px;margin-bottom:6px;font-size:0.68rem;color:var(--text3);">
+          <span id="chartLegendFull" style="display:flex;align-items:center;gap:5px;">
+            <span style="width:24px;height:2px;background:#ccc;display:inline-block;border-radius:2px;opacity:0.5;"></span>Full episode
+          </span>
+          <span id="chartLegendProg" style="display:flex;align-items:center;gap:5px;">
+            <span id="chartProgDot" style="width:10px;height:10px;border-radius:50%;background:var(--accent);display:inline-block;"></span>Progress so far
+          </span>
+          <span style="margin-left:auto;font-family:'Space Mono',monospace;color:var(--text2);">
+            Final: <span id="chartFinalVal" style="color:var(--text);font-weight:700;">—</span>
+          </span>
+        </div>
+        <canvas id="rewardChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-col">
+    <div class="panel">
+      <div class="info-section">
+        <div class="info-section-title">Comfort Status</div>
+        <div id="comfortBadge" class="comfort-badge badge-green">—</div>
+      </div>
+      <div class="info-section">
+        <div class="info-section-title">Current State</div>
+        <div class="kv-row"><span class="kv-key">Time of day</span><span class="kv-val" id="kvTime">—</span></div>
+        <div class="kv-row"><span class="kv-key">Occupancy</span><span class="kv-val" id="kvOcc">—</span></div>
+        <div class="kv-row"><span class="kv-key">Daylight</span><span class="kv-val" id="kvDaylight">—</span></div>
+        <div class="kv-row"><span class="kv-key">Target illum.</span><span class="kv-val" id="kvTarget">—</span></div>
+        <div class="kv-row"><span class="kv-key">Total illum.</span><span class="kv-val" id="kvLux">—</span></div>
+        <div class="kv-row"><span class="kv-key">Error</span><span class="kv-val" id="kvError">—</span></div>
+      </div>
+      <div class="info-section">
+        <div class="info-section-title">Control Values</div>
+        <div class="kv-row"><span class="kv-key">Brightness</span><span class="kv-val" id="kvBright">—</span></div>
+        <div class="kv-row"><span class="kv-key">Colour temp.</span><span class="kv-val" id="kvCCT">—</span></div>
+        <div class="kv-row"><span class="kv-key">CCT type</span><span class="kv-val" id="kvCCTType">—</span></div>
+        <div class="kv-row"><span class="kv-key">Power</span><span class="kv-val" id="kvPower">—</span></div>
+        <div class="kv-row"><span class="kv-key">Step reward</span><span class="kv-val" id="kvReward">—</span></div>
+        <div class="kv-row"><span class="kv-key">Ep. reward</span><span class="kv-val" id="kvCumReward">—</span></div>
+      </div>
+      <div class="info-section">
+        <div class="info-section-title">Performance Scores</div>
+        <div class="score-row">
+          <div class="score-label">Comfort<span id="scoreComfort">—</span></div>
+          <div class="score-track"><div class="score-fill" id="fillComfort" style="background:var(--green);width:0%"></div></div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Energy Efficiency<span id="scoreEnergy">—</span></div>
+          <div class="score-track"><div class="score-fill" id="fillEnergy" style="background:var(--accent);width:0%"></div></div>
+        </div>
+        <div class="score-row">
+          <div class="score-label">Colour Temperature<span id="scoreColour">—</span></div>
+          <div class="score-track"><div class="score-fill" id="fillColour" style="background:var(--amber);width:0%"></div></div>
+        </div>
+      </div>
+      <div class="info-section">
+        <div class="info-section-title">Overall Performance</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+          <span style="font-size:0.74rem;color:var(--text2);">Score</span>
+          <span id="scoreOverall" style="font-family:'Space Mono',monospace;font-size:1.05rem;font-weight:700;">—</span>
+        </div>
+        <div class="score-track" style="height:7px;">
+          <div class="score-fill" id="fillOverall" style="background:var(--accent);width:0%;height:100%;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:0.65rem;color:var(--text3);">
+          <span id="kvSeed">Seed —</span>
+          <span id="kvSrc">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ALGO_COLORS={PPO:'#185fa5',A2C:'#dc2626',SAC:'#16a34a',TD3:'#d97706'};
+const ALGO_META={
+  PPO:{full:'Proximal Policy Optimisation',type:'On-policy',steps:'500,000'},
+  A2C:{full:'Advantage Actor-Critic',type:'On-policy',steps:'500,000'},
+  SAC:{full:'Soft Actor-Critic',type:'Off-policy',steps:'300,000'},
+  TD3:{full:'Twin Delayed DDPG',type:'Off-policy',steps:'600,000'},
+};
+
+let episodeData={},currentAlgo='PPO',episode=[],currentStep=0,playing=false,playTimer=null,rewardChart=null;
+
+const fmtTime=h=>{let hh=Math.floor(h),mm=Math.round((h-hh)*60);if(mm===60){hh++;mm=0;}return`${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;};
+const cctType=c=>c<3500?'Warm white':c<5000?'Neutral white':'Cool / Daylight';
+const cctRgb=c=>{const t=(c-2700)/3800;return`rgb(${~~(255-t*30)},${~~(235+t*10)},${~~(180+t*75)})`;};
+const skyCol=h=>{if(h<6||h>=20)return'#1e3a5f';if(h<8){const t=(h-6)/2;return`rgb(${~~(30+t*143)},${~~(64+t*152)},${~~(114+t*136)})`;}if(h<17)return'#87ceeb';const t=Math.min(1,(h-17)/3);return`rgb(${~~(173+t*60)},${~~(216-t*90)},${~~(250-t*120)})`;};
+const $=id=>document.getElementById(id);
+
+const canvas=$('roomCanvas'),ctx=canvas.getContext('2d');
+function resizeCanvas(){canvas.width=canvas.offsetWidth;canvas.height=330;}
+window.addEventListener('resize',()=>{resizeCanvas();if(episode.length)drawRoom(episode[currentStep]);});
+
+function rr(x,y,w,h,r=6){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();}
+
+function drawRoom(s){
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#eef2f7';ctx.fillRect(0,0,W,H);
+  const lc=cctRgb(s.cct),ao=0.06+Math.min(s.total_lux/500,1)*0.38;
+  ctx.fillStyle=lc.replace('rgb','rgba').replace(')',`,${ao})`);ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#e2e6ea';ctx.fillRect(0,H-68,W,68);
+  ctx.fillStyle='#cdd2d8';ctx.fillRect(0,H-69,W,1);
+  const wX=18,wY=28,wW=108,wH=158;
+  ctx.fillStyle=skyCol(s.hour);rr(wX,wY,wW,wH,8);ctx.fill();
+  ctx.strokeStyle='#7dd3fc';ctx.lineWidth=3;rr(wX,wY,wW,wH,8);ctx.stroke();
+  ctx.strokeStyle='#7dd3fc';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(wX+wW/2,wY);ctx.lineTo(wX+wW/2,wY+wH);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(wX,wY+wH/2);ctx.lineTo(wX+wW,wY+wH/2);ctx.stroke();
+  if(s.daylight>0){
+    const da=Math.min(0.55,s.daylight/350*0.55);
+    // Main beam
+    const g=ctx.createLinearGradient(wX+wW,wY,wX+wW+280,wY+200);
+    g.addColorStop(0,`rgba(255,244,150,${da})`);
+    g.addColorStop(0.5,`rgba(255,244,150,${da*0.4})`);
+    g.addColorStop(1,'rgba(255,244,150,0)');
+    ctx.fillStyle=g;
+    ctx.beginPath();
+    ctx.moveTo(wX+wW-4,wY+4);ctx.lineTo(wX+wW-4,wY+wH-4);
+    ctx.lineTo(wX+wW+290,wY+wH+50);ctx.lineTo(wX+wW+290,wY-30);
+    ctx.closePath();ctx.fill();
+    // Bright streak at window edge
+    ctx.fillStyle=`rgba(255,255,200,${da*0.6})`;
+    ctx.beginPath();ctx.moveTo(wX+wW-4,wY+10);ctx.lineTo(wX+wW-4,wY+wH-10);
+    ctx.lineTo(wX+wW+40,wY+wH+10);ctx.lineTo(wX+wW+40,wY-6);
+    ctx.closePath();ctx.fill();
+  }
+  const li=Math.min(1,s.brightness/100);
+  [W*0.37,W*0.57,W*0.77].forEach(lx=>{
+    // Lamp body
+    ctx.fillStyle='#94a3b8';rr(lx-26,13,52,8,4);ctx.fill();
+    // Large ceiling glow cone (much bigger and more visible)
+    const g=ctx.createRadialGradient(lx,18,4,lx,18,H*0.75);
+    const a=0.15+li*0.65;
+    g.addColorStop(0,lc.replace('rgb','rgba').replace(')',`,${a})`));
+    g.addColorStop(0.3,lc.replace('rgb','rgba').replace(')',`,${a*0.5})`));
+    g.addColorStop(1,'rgba(255,248,220,0)');
+    ctx.fillStyle=g;
+    ctx.beginPath();ctx.ellipse(lx,18,130,H*0.75,0,0,Math.PI*2);ctx.fill();
+    // Bright core spot directly under lamp
+    const g2=ctx.createRadialGradient(lx,22,2,lx,22,55);
+    g2.addColorStop(0,lc.replace('rgb','rgba').replace(')',`,${Math.min(1,a+0.3)})`));
+    g2.addColorStop(1,'rgba(255,248,220,0)');
+    ctx.fillStyle=g2;ctx.beginPath();ctx.ellipse(lx,22,55,36,0,0,Math.PI*2);ctx.fill();
+  });
+  const dX=W*0.30,dY=H-80,dW=W*0.52,dH=13;
+  ctx.fillStyle='#92400e';rr(dX,dY,dW,dH,4);ctx.fill();
+  ctx.fillStyle='#78350f';rr(dX+12,dY+dH,11,50,3);ctx.fill();rr(dX+dW-23,dY+dH,11,50,3);ctx.fill();
+  const mX=dX+46,mY=dY-46,mW=70,mH=44;
+  ctx.fillStyle='#1e293b';rr(mX,mY,mW,mH,6);ctx.fill();ctx.fillStyle='#bfdbfe';rr(mX+4,mY+4,mW-8,mH-8,4);ctx.fill();ctx.fillStyle='rgba(96,165,250,0.3)';rr(mX+4,mY+4,mW-8,mH-8,4);ctx.fill();ctx.fillStyle='#1e293b';rr(mX+mW/2-5,mY+mH,10,10,2);ctx.fill();
+  if(s.occupied){const px=dX+dW*0.50,py=dY-34;ctx.fillStyle='#4f7ef8';ctx.beginPath();ctx.arc(px,py,12,0,Math.PI*2);ctx.fill();rr(px-12,py+12,24,32,9);ctx.fill();ctx.strokeStyle='#4f7ef8';ctx.lineWidth=4.5;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(px-12,py+18);ctx.lineTo(px-28,py+30);ctx.stroke();ctx.beginPath();ctx.moveTo(px+12,py+18);ctx.lineTo(px+26,py+28);ctx.stroke();ctx.beginPath();ctx.moveTo(px-7,py+44);ctx.lineTo(px-9,py+72);ctx.stroke();ctx.beginPath();ctx.moveTo(px+7,py+44);ctx.lineTo(px+9,py+72);ctx.stroke();}
+  else{ctx.fillStyle='#94a3b8';ctx.font='12px Inter';ctx.textAlign='center';ctx.fillText('No occupant',W*0.60,H*0.52);}
+  const df=Math.abs(s.total_lux-s.target_lux),dc=df<=30?'#16a34a':s.total_lux<s.target_lux?'#d97706':'#dc2626';
+  ctx.fillStyle=dc;ctx.beginPath();ctx.arc(W-20,34,7,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=dc;ctx.globalAlpha=0.28;ctx.lineWidth=3;ctx.beginPath();ctx.arc(W-20,34,12,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
+  ctx.fillStyle='rgba(0,0,0,0.38)';ctx.font='bold 10px Space Mono,monospace';ctx.textAlign='center';ctx.fillText(fmtTime(s.hour),W-20,52);ctx.textAlign='left';
+}
+
+function buildRewardChart(){
+  const c2=$('rewardChart').getContext('2d');
+  if(rewardChart){rewardChart.destroy();rewardChart=null;}
+  const col=ALGO_COLORS[currentAlgo];
+  // Update legend dot colour
+  $('chartProgDot').style.background=col;
+  // Show final reward value
+  $('chartFinalVal').textContent=episode[episode.length-1].cum_reward.toFixed(2);
+  $('chartFinalVal').style.color=col;
+
+  rewardChart=new Chart(c2,{
+    type:'line',
+    data:{
+      labels:episode.map((_,i)=>i),
+      datasets:[
+        {label:'Full',data:episode.map(s=>s.cum_reward),
+         borderColor:col+'35',borderWidth:1.5,pointRadius:0,fill:false,tension:0.3},
+        {label:'Progress',data:episode.map((s,i)=>i<=currentStep?s.cum_reward:null),
+         borderColor:col,borderWidth:3,pointRadius:0,fill:true,
+         backgroundColor:col+'22',tension:0.3,spanGaps:false},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:{duration:0},
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          enabled:true,
+          callbacks:{
+            title:ctx=>[`Step ${ctx[0].dataIndex+1} / ${episode.length}`,
+                        `Time: ${fmtTime(episode[ctx[0].dataIndex].hour)}`],
+            label:ctx=>`Cumulative Reward: ${ctx.parsed.y.toFixed(2)}`,
+          }
+        }
+      },
+      scales:{
+        x:{display:false},
+        y:{
+          grid:{color:'#e5e9f0'},
+          ticks:{font:{size:9},color:'#94a3b8'},
+          border:{display:false}
+        }
+      }
+    }
+  });
+}
+
+function updateChart(){
+  if(!rewardChart)return;
+  rewardChart.data.datasets[1].data=episode.map((s,i)=>i<=currentStep?s.cum_reward:null);
+  rewardChart.update('none');
+}
+
+function updateUI(){
+  if(!episode.length)return;
+  const s=episode[currentStep],col=ALGO_COLORS[currentAlgo];
+  const pct=currentStep/Math.max(episode.length-1,1)*100;
+  drawRoom(s);
+  $('valBright').textContent=s.brightness.toFixed(1)+'%';
+  $('valDaylight').textContent=s.daylight.toFixed(1)+' lx';
+  $('valLux').textContent=s.total_lux.toFixed(1)+' lx';
+  $('barBright').style.width=s.brightness+'%';
+  $('barDaylight').style.width=Math.min(s.daylight/350*100,100)+'%';
+  $('barLux').style.width=Math.min(s.total_lux/600*100,100)+'%';
+  $('timelineFill').style.width=$('timelineThumb').style.left=pct+'%';
+  $('stepLabel').textContent=`Step ${currentStep+1} / ${episode.length}`;
+  $('totalReward').textContent=s.cum_reward.toFixed(2);
+  $('occupancyLabel').textContent=s.occupied?'🟢 Occupied':'🔴 Unoccupied';
+  const diff=Math.abs(s.total_lux-s.target_lux),badge=$('comfortBadge');
+  if(diff<=30){badge.textContent='✔ Comfortable';badge.className='comfort-badge badge-green';}
+  else if(s.total_lux<s.target_lux){badge.textContent='↓ Too Dim';badge.className='comfort-badge badge-amber';}
+  else{badge.textContent='↑ Too Bright';badge.className='comfort-badge badge-red';}
+  $('kvTime').textContent=fmtTime(s.hour);
+  $('kvOcc').textContent=s.occupied?'Occupied':'Unoccupied';
+  $('kvDaylight').textContent=s.daylight.toFixed(1)+' lx';
+  $('kvTarget').textContent=s.target_lux.toFixed(1)+' lx';
+  $('kvLux').textContent=s.total_lux.toFixed(1)+' lx';
+  $('kvError').textContent=s.error.toFixed(1)+' lx';
+  $('kvBright').textContent=s.brightness.toFixed(1)+'%';
+  $('kvCCT').textContent=s.cct.toFixed(0)+' K';
+  $('kvCCTType').textContent=cctType(s.cct);
+  $('kvPower').textContent=s.power.toFixed(4);
+  $('kvReward').textContent=s.reward.toFixed(3);
+  $('kvCumReward').textContent=s.cum_reward.toFixed(2);
+  [['Comfort','comfort'],['Energy','energy'],['Colour','colour'],['Overall','overall']].forEach(([k,key])=>{
+    const v=s[key],el=$('score'+k),fl=$('fill'+k);
+    if(el)el.textContent=v.toFixed(1);
+    if(fl){fl.style.width=v+'%';if(k==='Overall')fl.style.background=col;}
+  });
+  const meta=episodeData[currentAlgo];
+  $('kvSeed').textContent=`Best Seed: ${meta.best_seed}`;
+  $('kvSrc').textContent=meta.model_source;
+  updateChart();
+}
+
+function buildPills(){
+  const c=$('algoPills');c.innerHTML='';
+  ['PPO','A2C','SAC','TD3'].forEach(al=>{
+    if(!episodeData[al])return;
+    const b=document.createElement('button');
+    b.className='pill'+(al===currentAlgo?` active-${al}`:'');
+    b.textContent=al;b.onclick=()=>selectAlgo(al);c.appendChild(b);
+  });
+}
+
+function updateAlgoInfo(){
+  const meta=episodeData[currentAlgo],am=ALGO_META[currentAlgo],col=ALGO_COLORS[currentAlgo];
+  $('algoInfo').innerHTML=`<b style="color:${col};font-family:'Space Mono',monospace;">${currentAlgo}</b><span>${am.full}</span><span style="color:#cdd6e2;">|</span><span>${am.type} · ${am.steps} timesteps</span><span class="seed-badge">✦ Best Seed: ${meta.best_seed} &nbsp;·&nbsp; Score: ${meta.best_score}</span>`;
+}
+
+function selectAlgo(al){
+  if(!episodeData[al])return;
+  currentAlgo=al;episode=episodeData[al].episode;currentStep=0;
+  stopPlay();buildPills();updateAlgoInfo();buildRewardChart();updateUI();
+}
+
+function stopPlay(){playing=false;clearInterval(playTimer);$('btnPlay').textContent='▶';}
+function startPlay(){
+  if(playing)return;
+  if(currentStep>=episode.length-1)currentStep=0;
+  playing=true;$('btnPlay').textContent='⏸';
+  playTimer=setInterval(()=>{if(currentStep>=episode.length-1){stopPlay();return;}currentStep++;updateUI();},parseInt($('speedSel').value));
+}
+
+$('btnPlay').onclick=()=>playing?stopPlay():startPlay();
+$('btnRestart').onclick=()=>{stopPlay();currentStep=0;updateUI();};
+$('btnBack').onclick=()=>{stopPlay();currentStep=Math.max(0,currentStep-1);updateUI();};
+$('btnFwd').onclick=()=>{stopPlay();currentStep=Math.min(episode.length-1,currentStep+1);updateUI();};
+$('timelineTrack').addEventListener('click',e=>{const r=e.currentTarget.getBoundingClientRect();const f=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));stopPlay();currentStep=Math.round(f*(episode.length-1));updateUI();});
+document.addEventListener('keydown',e=>{
+  if(['Space','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+  if(e.code==='Space')playing?stopPlay():startPlay();
+  else if(e.code==='ArrowLeft'){stopPlay();currentStep=Math.max(0,currentStep-1);updateUI();}
+  else if(e.code==='ArrowRight'){stopPlay();currentStep=Math.min(episode.length-1,currentStep+1);updateUI();}
+  else if(e.code==='KeyR'){stopPlay();currentStep=0;updateUI();}
+  else if(e.key==='1')selectAlgo('PPO');
+  else if(e.key==='2')selectAlgo('A2C');
+  else if(e.key==='3')selectAlgo('SAC');
+  else if(e.key==='4')selectAlgo('TD3');
+});
+
+window.addEventListener('load',async()=>{
+  resizeCanvas();
+  const showError=msg=>{
+    $('spinnerEl').style.display='none';
+    $('overlayMsg').style.display='none';
+    $('errorBox').style.display='block';
+    if(msg)$('errorDetail').textContent=msg;
+  };
+  try{
+    const statusRes=await fetch('/api/status');
+    const status=await statusRes.json();
+    if(!status.data_file_exists){showError('Hint: the file episode_data.json does not exist in your project folder.');return;}
+    if(!status.algorithms_available.length){showError('episode_data.json exists but contains no algorithm data. Re-run export_episode.py.');return;}
+
+    const res=await fetch('/api/data');
+    if(!res.ok){showError(`Server error ${res.status}`);return;}
+    episodeData=await res.json();
+    if(episodeData.error){showError(episodeData.error);return;}
+
+    const first=['PPO','A2C','SAC','TD3'].find(a=>episodeData[a]);
+    if(!first){showError('No valid algorithm data found.');return;}
+
+    currentAlgo=first;episode=episodeData[first].episode;
+    buildPills();updateAlgoInfo();resizeCanvas();buildRewardChart();updateUI();
+    $('overlay').style.display='none';
+  }catch(err){
+    showError(`Network error: ${err.message}. Is app.py running?`);
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+{
+  "name": "TD3",
+  "runs": [
+    {
+      "reward": 51.73114155201678,
+      "comfort": 94.1388585129123,
+      "energy": 98.16355308387739,
+      "colour": 43.29172300299009,
+      "overall": 84.97560505366913,
+      "error": 48.98095866074031,
+      "power": 0.25934316714604694,
+      "seed": 1,
+      "path": "results_train\\td3\\run_1\\best_model\\best_model.zip",
+      "source_type": "best_model"
+    },
+    {
+      "reward": 52.09904335270972,
+      "comfort": 94.34422781927874,
+      "energy": 98.11886741056392,
+      "colour": 62.403124858935676,
+      "overall": 88.89966712503143,
+      "error": 48.22426556699539,
+      "power": 0.26242562383413315,
+      "seed": 2,
+      "path": "results_train\\td3\\run_2\\best_model\\best_model.zip",
+      "source_type": "best_model"
+    },
+    {
+      "reward": 51.660984070013626,
+      "comfort": 94.12060115076511,
+      "energy": 98.35983901216647,
+      "colour": 50.79609628518423,
+      "overall": 86.51550964299928,
+      "error": 49.84972020019954,
+      "power": 0.25586062173048657,
+      "seed": 3,
+      "path": "results_train\\td3\\run_3\\best_model\\best_model.zip",
+      "source_type": "best_model"
+    }
+  ],
+  "reward_mean": 51.83038965824671,
+  "reward_std": 0.19211389630758932,
+  "comfort_mean": 94.20122916098538,
+  "comfort_std": 0.10138966095685585,
+  "energy_mean": 98.21408650220259,
+  "energy_std": 0.10466469627799554,
+  "colour_mean": 52.16364804903667,
+  "colour_std": 7.861894114226844,
+  "overall_mean": 86.79692727389994,
+  "overall_std": 1.6143032959995167,
+  "error_mean": 49.01831480931175,
+  "power_mean": 0.2592098042368889,
+  "best_seed": 2,
+  "best_overall": 88.89966712503143,
+  "best_path": "results_train\\td3\\run_2\\best_model\\best_model.zip"
+}

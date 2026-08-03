@@ -1,0 +1,56 @@
+{
+  "name": "PPO",
+  "runs": [
+    {
+      "reward": 51.90747859581809,
+      "comfort": 93.50201859815577,
+      "energy": 99.6650977022356,
+      "colour": 51.3456538853546,
+      "overall": 86.6115154316155,
+      "error": 57.00662688847498,
+      "power": 0.2272314129707714,
+      "seed": 1,
+      "path": "results_train\\ppo\\run_1\\best_model\\best_model.zip",
+      "source_type": "best_model"
+    },
+    {
+      "reward": 52.029490652324654,
+      "comfort": 92.66506789463172,
+      "energy": 99.44191084796252,
+      "colour": 62.029091926912464,
+      "overall": 88.23208343942058,
+      "error": 58.40154472768174,
+      "power": 0.22165174161394438,
+      "seed": 2,
+      "path": "results_train\\ppo\\run_2\\best_model\\best_model.zip",
+      "source_type": "best_model"
+    },
+    {
+      "reward": 52.10710756684469,
+      "comfort": 93.10098245950947,
+      "energy": 99.55815473192992,
+      "colour": 67.84763956566651,
+      "overall": 89.664606948846,
+      "error": 57.67502045288549,
+      "power": 0.22455783871312937,
+      "seed": 3,
+      "path": "results_train\\ppo\\run_3\\best_model\\best_model.zip",
+      "source_type": "best_model"
+    }
+  ],
+  "reward_mean": 52.014692271662476,
+  "reward_std": 0.08216720988712227,
+  "comfort_mean": 93.08935631743232,
+  "comfort_std": 0.34178257749340235,
+  "energy_mean": 99.555054427376,
+  "energy_std": 0.0911420206649073,
+  "colour_mean": 60.407461792644526,
+  "colour_std": 6.8337957274894325,
+  "overall_mean": 88.1694019399607,
+  "overall_std": 1.2472071950100116,
+  "error_mean": 57.6943973563474,
+  "power_mean": 0.22448033109928173,
+  "best_seed": 3,
+  "best_overall": 89.664606948846,
+  "best_path": "results_train\\ppo\\run_3\\best_model\\best_model.zip"
+}

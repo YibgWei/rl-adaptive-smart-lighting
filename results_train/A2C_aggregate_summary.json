@@ -1,0 +1,56 @@
+{
+  "name": "A2C",
+  "runs": [
+    {
+      "reward": 43.391444010451266,
+      "comfort": 69.21632269526057,
+      "energy": 87.8694441317922,
+      "colour": 22.30296814441681,
+      "overall": 64.49693214422473,
+      "error": 89.59976529111331,
+      "power": 0.10581367711226146,
+      "seed": 1,
+      "path": "results_train\\a2c\\run_1\\best_model\\best_model.zip",
+      "source_type": "best_model"
+    },
+    {
+      "reward": 42.45503159619272,
+      "comfort": 66.7546853854969,
+      "energy": 89.92936376724703,
+      "colour": 29.177620708942413,
+      "overall": 65.03294204562353,
+      "error": 111.12082423051065,
+      "power": 0.010774623602628708,
+      "seed": 2,
+      "path": "results_train\\a2c\\run_2\\best_model\\best_model.zip",
+      "source_type": "best_model"
+    },
+    {
+      "reward": 42.95448649866944,
+      "comfort": 66.7546853854969,
+      "energy": 90.57584118340475,
+      "colour": 43.56034701069196,
+      "overall": 68.07110666001287,
+      "error": 113.81448013116783,
+      "power": 0.0,
+      "seed": 3,
+      "path": "results_train\\a2c\\run_3\\best_model\\best_model.zip",
+      "source_type": "best_model"
+    }
+  ],
+  "reward_mean": 42.933654035104475,
+  "reward_std": 0.3825724733502746,
+  "comfort_mean": 67.57523115541812,
+  "comfort_std": 1.1604269563704692,
+  "energy_mean": 89.45821636081466,
+  "energy_std": 1.1540165103340079,
+  "colour_mean": 31.680311954683727,
+  "colour_std": 8.856885708107678,
+  "overall_mean": 65.86699361662038,
+  "overall_std": 1.5738302290143595,
+  "error_mean": 104.84502321759726,
+  "power_mean": 0.03886276690496339,
+  "best_seed": 3,
+  "best_overall": 68.07110666001287,
+  "best_path": "results_train\\a2c\\run_3\\best_model\\best_model.zip"
+}
