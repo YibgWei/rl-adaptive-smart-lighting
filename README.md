@@ -32,18 +32,20 @@ The project follows a structured RL development pipeline:
 Each algorithm was evaluated on training stability, sample efficiency, and suitability for the continuous action space required by this environment.
 
 ## Repository Contents
-- `G4_report.docx` — Full project report, covering problem framing, theoretical background, environment design, algorithm selection and justification, training methodology, results, and conclusions
-- `G4_video (version 2).mp4` — Project demo/presentation video
-- `lighting_env.py` — Custom lighting environment (MDP: state space, action space, reward structure, transition dynamics)
-- `exploration.ipynb` — Notebook for exploring exploration strategies
-- `final_coding.ipynb` — Main notebook for agent implementation and training
-- `model_comparison.ipynb` — Notebook comparing TD3, A2C, PPO, and SAC performance
-- `app.py` — Application script (interface/demo)
-- `index.html` — Web front-end for the app
-- `episode_data.json` — Recorded episode data from training/simulation
-- `train/` — Training scripts and related files
-- `tune/` — Hyperparameter tuning scripts and related files
-- `results_train/` — Training results and outputs
+| File / Folder | Description |
+|---|---|
+| `G4_report.docx` | Full project report — problem framing, theoretical background, environment design, algorithm selection and justification, training methodology, results, and conclusions |
+| `G4_video (version 2).mp4` | Project demo/presentation video |
+| `lighting_env.py` | Custom lighting environment (MDP: state space, action space, reward structure, transition dynamics) |
+| `exploration.ipynb` | Notebook for exploring exploration strategies |
+| `final_coding.ipynb` | Main notebook for agent implementation and training |
+| `model_comparison.ipynb` | Notebook comparing TD3, A2C, PPO, and SAC performance |
+| `app.py` | Application script (interface/demo) |
+| `index.html` | Web front-end for the app |
+| `episode_data.json` | Recorded episode data from training/simulation |
+| `train/` | Training scripts and related files |
+| `tune/` | Hyperparameter tuning scripts and related files |
+| `results_train/` | Training results and outputs |
 
 ## Module Information
 - **Module:** BMDS2114 Machine Learning
