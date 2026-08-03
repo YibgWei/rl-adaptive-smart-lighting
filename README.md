@@ -38,14 +38,9 @@ Each algorithm was evaluated on training stability, sample efficiency, and suita
 ## Module Information
 - **Module:** BMDS2114 Machine Learning
 - **Semester:** 202601
-- **Programme:** RDSY2S3
-- **Tutorial Group:** 2
-- **Tutor:** Dr. Lim Siew Mooi
 
 ## Team
-| No. | Name           | Registration No. |
-|-----|----------------|------------------|
-|  1  | Ngoh Jia Ying  |    24WMR08011    |
-|  2  | Lee Cheng Chee |    24WMR07994    |
-|  3  | Ooi Ying Wei   |    24WMR08016    |
-|  4  | Tim Kam        |    24WMR08038    |
+- Ngoh Jia Ying
+- Lee Cheng Chee
+- Ooi Ying Wei
+- Tim Kam
