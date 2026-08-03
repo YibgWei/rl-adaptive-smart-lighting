@@ -34,8 +34,8 @@ Each algorithm was evaluated on training stability, sample efficiency, and suita
 ## Repository Contents
 | File / Folder | Description |
 |---|---|
-| `G4_report.docx` | Full project report — problem framing, theoretical background, environment design, algorithm selection and justification, training methodology, results, and conclusions |
-| `G4_video (version 2).mp4` | Project demo/presentation video |
+| `Report.docx` | Full project report — problem framing, theoretical background, environment design, algorithm selection and justification, training methodology, results, and conclusions |
+| `Video.mp4` | Project demo/presentation video |
 | `lighting_env.py` | Custom lighting environment (MDP: state space, action space, reward structure, transition dynamics) |
 | `exploration.ipynb` | Notebook for exploring exploration strategies |
 | `final_coding.ipynb` | Main notebook for agent implementation and training |
